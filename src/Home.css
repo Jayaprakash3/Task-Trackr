@@ -1,0 +1,33 @@
+.textbox-container {
+    display: flex;
+    align-items: center;
+}
+
+.textbox {
+    padding: 8px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-right: 8px;
+}
+
+.add-button {
+    padding: 8px 16px;
+    font-size: 16px;
+    background-color: #4caf50;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.add-button:hover {
+    background-color: #45a049;
+}
+
+.add-button:focus {
+    outline: none;
+}
+.h{
+    color: red;
+}
