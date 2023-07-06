@@ -1,49 +1,55 @@
 import React, { useEffect, useState } from 'react';
 import { useRef } from 'react';
-import datas from './Datas.json';
 import './Task.css';
 
 const TaskEnter = () => {
     const inputRef = useRef();
-    // const [name, setName] = useState('');
     const [userId, setuserId] = useState('');
-    const [name, setName] = useState('');
-
+    const [date, setDate] = useState(new Date());
     const [emailId, setEmailId] = useState('');
-    const [task, setTask] = useState('');
-    const [status, setStatus] = useState('');
+    const [taskName, setTask] = useState('');
+    const [status, setStatus] = useState("InProgress");
     const [isPopupOpen, setPopupOpen] = useState(false);
     const [editedTask, setEditedTask] = useState('');
     const [editedTaskIndex, setEditedTaskIndex] = useState(null);
     const [userTaskData, setUserTaskData] = useState([]);
 
     const DataFetching = async () => {
-        
-        const jsonData={
-            emailId:"selvaraj.sivasankari@gmail.com",
-            name:"sankari"
-        } 
 
-        const a=JSON.stringify(jsonData)
-        console.log(jsonData); 
+        const jsonData = {
+            emailId: "selvaraj.sivasankari@gmail.com",
+            name: "sankari"
+        }
 
-    await fetch(`http://localhost:3000/tasks/createNewUser`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: a,
-    })
-        .then((response) => response.json())
-        .then((data) => {
-            setUserTaskData(data);
-            setuserId(data[0].userId);
-            console.log(data[0].userId);
-            console.log("Data saved successfully:", data);
+        const dbData = JSON.stringify(jsonData)
+        console.log(jsonData);
+
+        await fetch(`http://localhost:3000/tasks/createNewUser`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: dbData,
         })
-        .catch((error) => {
-            console.error("Error saving data:", error);
-        });
+            .then((response) => response.json())
+            .then((data) => {
+                if (data.tasks !== 'No-Task') {
+                    setUserTaskData(data);
+                    if (data.length > 0) {
+                        setuserId(data[0].userId);
+                    }
+                    console.log("Data saved successfully111111111:", data);
+                    console.log("Dsimnplly:", userTaskData);
+                }
+                else {
+                    setuserId(data.userId);
+                    console.log("hiiii")
+                }
+
+            })
+            .catch((error) => {
+                console.error("Error saving data:", error);
+            });
     };
 
     const SaveToDb = async (jsonData) => {
@@ -65,7 +71,6 @@ const TaskEnter = () => {
 
 
     const UpdateTaskToDb = async (jsonData) => {
-        //await fetch(`http://localhost:3000/users/put-endpoint`, { 
         await fetch(`http://localhost:3000/tasks/updateTaskName`, {
             method: "PUT",
             headers: {
@@ -102,7 +107,6 @@ const TaskEnter = () => {
 
 
     const DeleteToDb = async (jsonData) => {
-        // await fetch(`http://localhost:3000/users/delete-endpoint`, {
         await fetch(`http://localhost:3000/tasks/deleteTask`, {
             method: "DELETE",
             headers: {
@@ -121,16 +125,16 @@ const TaskEnter = () => {
 
 
     useEffect(() => {
-       
+
         setTimeout(() => {
             DataFetching();
-        }, 1000);
+        }, 500);
     }, []);
 
 
     const openPopup = (task, index) => {
 
-        console.log(task+"1234567")
+        console.log(task + "1234567")
         setEditedTask(task);
         setEditedTaskIndex(index);
         setPopupOpen(true);
@@ -149,21 +153,17 @@ const TaskEnter = () => {
             setUserTaskData(updatedData);
             closePopup();
             const Data = {
-                "task": editedTask,
+                "taskName": editedTask,
                 "index": editedTaskIndex,
                 "userId": userId
             }
-            const a=JSON.stringify(Data)
-
-            UpdateTaskToDb(a);
+            const dbData = JSON.stringify(Data)
+            UpdateTaskToDb(dbData);
 
         }
     };
 
-    // useEffect(() => {
-    //     setUserTaskData(datas);
-    //     setuserId(123)
-    // }, []);
+
 
     const AddTask = (e) => {
         setTask(e.target.value);
@@ -180,10 +180,10 @@ const TaskEnter = () => {
             "index": index,
             "userId": userId
         }
-        const a=JSON.stringify(Data)
+        const dbData = JSON.stringify(Data)
 
-        
-        DeleteToDb(a);
+
+        DeleteToDb(dbData);
 
     };
 
@@ -200,27 +200,31 @@ const TaskEnter = () => {
             "index": index,
             "userId": userId
         }
-        const a=JSON.stringify(Data)
+        const dbData = JSON.stringify(Data)
 
-        UpdateStatusToDb(a);
+        UpdateStatusToDb(dbData);
     };
 
     const AddUserTask = () => {
-        const newData = { emailId, task, status };
+        setDate(new Date());
+        console.log(date.toString())
+        const newData = { taskName, status, date, userId };
+        console.log(newData)
         setUserTaskData([...userTaskData, newData]);
-        setEmailId('');
-        setStatus('');
-        setTask('');
+
 
         const Data = {
-            "taskName": task,
+            "taskName": taskName,
             "userId": userId,
-            "status":"InProgress",
-            "date":new Date()
+            "status": status,
+            "date": new Date()
         }
-        const a=JSON.stringify(Data)
+        const dbData = JSON.stringify(Data)
+        console.log("saving")
+        // console.log(dbData)
 
-        SaveToDb(a);
+        SaveToDb(dbData);
+        setEmailId('');
         inputRef.current.value = '';
         inputRef.current.focus();
     };
@@ -234,8 +238,8 @@ const TaskEnter = () => {
                     type="text"
                     autoFocus
                     required
-                    name="task"
-                    id="task"
+                    name="taskName"
+                    id="taskName"
                     placeholder="Enter the task"
                     onChange={AddTask}
                     ref={inputRef}
@@ -244,10 +248,11 @@ const TaskEnter = () => {
                 <button onClick={AddUserTask}>Add</button>
                 <br></br>
             </div>
+
             <div>
                 <ul>
-                    {userTaskData.map((data, index) => {
-                        return (
+                    {userTaskData.length > 0 ? (
+                        userTaskData.map((data, index) => (
                             <li key={index}>
                                 Task: {data.taskName}----- Status: {data.status}
                                 <button onClick={() => openPopup(data.taskName, index)}>Edit</button>
@@ -268,9 +273,12 @@ const TaskEnter = () => {
                                 <button onClick={() => UpdateStatus(index)}>Completed</button>
                                 <button onClick={() => DeleteTask(index)}>Delete</button>
                             </li>
-                        );
-                    })}
+                        ))
+                    ) : (
+                        <li>No task found</li>
+                    )}
                 </ul>
+
             </div>
         </>
     );
