@@ -4,27 +4,28 @@ import editImage from '../assets/edit.png';
 import tickImage from '../assets/tick.png';
 import trashImage from '../assets/trash.png';
 import classes from './UI/Card.module.css';
+import './Task.css';
 
 const TaskEnter = () => {
     const inputRef = useRef();
     const [userId, setuserId] = useState('');
-    const [name, setName] = useState('');
+    const [date, setDate] = useState(new Date());
     const [emailId, setEmailId] = useState('');
-    const [task, setTask] = useState('');
-    const [status, setStatus] = useState('');
+    const [taskName, setTask] = useState('');
+    const [status, setStatus] = useState("InProgress");
     const [isPopupOpen, setPopupOpen] = useState(false);
     const [editedTask, setEditedTask] = useState('');
     const [editedTaskIndex, setEditedTaskIndex] = useState(null);
     const [userTaskData, setUserTaskData] = useState([]);
 
     const DataFetching = async () => {
+
         const jsonData = {
             emailId: "selvaraj.sivasankari@gmail.com",
             name: "sankari"
-        };
+        }
 
-        const a = JSON.stringify(jsonData);
-
+        const dbData = JSON.stringify(jsonData)
         console.log(jsonData);
 
         await fetch(`http://localhost:3000/tasks/createNewUser`, {
@@ -32,14 +33,23 @@ const TaskEnter = () => {
             headers: {
                 "Content-Type": "application/json",
             },
-            body: a,
+            body: dbData,
         })
             .then((response) => response.json())
             .then((data) => {
-                setUserTaskData(data);
-                setuserId(data[0].userId);
-                console.log(data[0].userId);
-                console.log("Data saved successfully:", data);
+                if (data.tasks !== 'No-Task') {
+                    setUserTaskData(data);
+                    if (data.length > 0) {
+                        setuserId(data[0].userId);
+                    }
+                    console.log("Data saved successfully111111111:", data);
+                    console.log("Dsimnplly:", userTaskData);
+                }
+                else {
+                    setuserId(data.userId);
+                    console.log("hiiii")
+                }
+
             })
             .catch((error) => {
                 console.error("Error saving data:", error);
@@ -117,11 +127,12 @@ const TaskEnter = () => {
     useEffect(() => {
         setTimeout(() => {
             DataFetching();
-        }, 1000);
+        }, 500);
     }, []);
 
     const openPopup = (task, index) => {
-        console.log(task + "1234567");
+
+        console.log(task + "1234567")
         setEditedTask(task);
         setEditedTaskIndex(index);
         setPopupOpen(true);
@@ -140,15 +151,17 @@ const TaskEnter = () => {
             setUserTaskData(updatedData);
             closePopup();
             const Data = {
-                "task": editedTask,
+                "taskName": editedTask,
                 "index": editedTaskIndex,
                 "userId": userId
-            };
-            const a = JSON.stringify(Data);
+            }
+            const dbData = JSON.stringify(Data)
+            UpdateTaskToDb(dbData);
 
-            UpdateTaskToDb(a);
         }
     };
+
+
 
     const AddTask = (e) => {
         setTask(e.target.value);
@@ -164,10 +177,12 @@ const TaskEnter = () => {
         const Data = {
             "index": index,
             "userId": userId
-        };
-        const a = JSON.stringify(Data);
+        }
+        const dbData = JSON.stringify(Data)
 
-        DeleteToDb(a);
+
+        DeleteToDb(dbData);
+
     };
 
     const UpdateStatus = (index) => {
@@ -182,104 +197,88 @@ const TaskEnter = () => {
             "status": updatedData[index].status,
             "index": index,
             "userId": userId
-        };
-        const a = JSON.stringify(Data);
+        }
+        const dbData = JSON.stringify(Data)
 
-        UpdateStatusToDb(a);
+        UpdateStatusToDb(dbData);
     };
 
     const AddUserTask = () => {
-        const newData = { emailId, task, status };
+        setDate(new Date());
+        console.log(date.toString())
+        const newData = { taskName, status, date, userId };
+        console.log(newData)
         setUserTaskData([...userTaskData, newData]);
-        setEmailId('');
-        setStatus('');
-        setTask('');
+
 
         const Data = {
-            "taskName": task,
+            "taskName": taskName,
             "userId": userId,
-            "status": "InProgress",
+            "status": status,
             "date": new Date()
-        };
-        const a = JSON.stringify(Data);
+        }
+        const dbData = JSON.stringify(Data)
+        console.log("saving")
+        // console.log(dbData)
 
-        SaveToDb(a);
+        SaveToDb(dbData);
+        setEmailId('');
         inputRef.current.value = '';
         inputRef.current.focus();
     };
 
     return (
-        <div className={classes.cardWrapper}>
-            <form className="flex max-w-md flex-col gap-4">
-                <div>
-                    <div className="mb-2 block">
-                        <label htmlFor="task">Enter Your Task:</label>
-                    </div>
-                    <TextInput
-                        type="text"
-                        autoFocus
-                        required
-                        name="task"
-                        id="task"
-                        placeholder="Enter the task"
-                        onChange={AddTask}
-                        ref={inputRef}
-                    />
-                </div>
-                <Button onClick={AddUserTask} className='bg-slate-500'>Add</Button>
-            </form>
+        <>
+            <div>
+                <label htmlFor="task">Task : </label>
+                <br></br>
+                <input
+                    type="text"
+                    autoFocus
+                    required
+                    name="taskName"
+                    id="taskName"
+                    placeholder="Enter the task"
+                    onChange={AddTask}
+                    ref={inputRef}
+                />
+                <br></br>
+                <button onClick={AddUserTask}>Add</button>
+                <br></br>
+            </div>
 
             <div>
                 <ul>
-
-                    <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
-                        <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-                            <thead className="text-xstext-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-                                <tr>
-                                    <th scope="col" className="px-6 py-3">
-                                        S.No
-                                    </th>
-                                    <th scope="col" className="px-6 py-3">
-                                        Task
-                                    </th>
-                                    <th scope="col" className="px-6 py-3">
-                                        Status
-                                    </th>
-                                    <th scope="col" className="px-6 py-3">
-                                        Action
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {userTaskData.map((data, index) => (
-                                    <li key={index}>
-                                        <tr className="bg-white border-b dark:bg-gray-900 dark:border-gray-700">
-                                            <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                                {index}
-                                            </th>
-                                            <td className="px-6 py-4">{data.taskName}</td>
-                                            <td className="px-6 py-4">{data.status}</td>
-                                            <td className="px-6 py-4">
-                                                <a onClick={() => openPopup(data.taskName, index)} type="button" data-modal-show="editUserModal" className="font-medium text-blue-600 dark:text-blue-500 hover:underline">
-                                                    <img className="" src={editImage} alt="editImage" />
-                                                </a>
-                                                <a onClick={handleUpdateTask} type="button" data-modal-show="editUserModal" className="font-medium text-blue-600 dark:text-blue-500 hover:underline">
-                                                    <img className="" src={tickImage} alt="tickImage" />
-                                                </a>
-                                                <a onClick={closePopup} type="button" data-modal-show="editUserModal" className="font-medium text-blue-600 dark:text-blue-500 hover:underline">
-                                                    <img className="" src={trashImage} alt="trashImage" />
-                                                </a>
-                                            </td>
-                                        </tr>
-                                    </li>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-
+                    {userTaskData.length > 0 ? (
+                        userTaskData.map((data, index) => (
+                            <li key={index}>
+                                Task: {data.taskName}----- Status: {data.status}
+                                <button onClick={() => openPopup(data.taskName, index)}>Edit</button>
+                                {isPopupOpen && editedTaskIndex === index && (
+                                    <div className="popup">
+                                        <div className="popup-content">
+                                            <h3>Edit Task</h3>
+                                            <input
+                                                type="text"
+                                                value={editedTask}
+                                                onChange={UpdateTask}
+                                            />
+                                            <button onClick={handleUpdateTask}>Update</button>
+                                            <button onClick={closePopup}>Cancel</button>
+                                        </div>
+                                    </div>
+                                )}
+                                <button onClick={() => UpdateStatus(index)}>Completed</button>
+                                <button onClick={() => DeleteTask(index)}>Delete</button>
+                            </li>
+                        ))
+                    ) : (
+                        <li>No task found</li>
+                    )}
                 </ul>
+
             </div>
-        </div>
+        </>
     );
 };
 
