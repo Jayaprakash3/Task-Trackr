@@ -1,5 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import { useRef } from 'react';
+import React, { useEffect, useState, useRef, Fragment } from 'react';
+import { Label, TextInput, Button } from "flowbite-react";
+import editImage from '../assets/edit.png';
+import tickImage from '../assets/tick.png';
+import trashImage from '../assets/trash.png';
+import classes from './UI/Card.module.css';
 import { AiFillFilter } from "react-icons/ai";
 import './Task.css';
 const TaskEnter = () => {
@@ -70,7 +74,6 @@ const TaskEnter = () => {
             });
     };
 
-
     const UpdateTaskToDb = async (jsonData) => {
         await fetch(`http://localhost:3000/tasks/updateTaskName`, {
             method: "PUT",
@@ -87,7 +90,6 @@ const TaskEnter = () => {
                 console.error("Error updating data:", error);
             });
     };
-
 
     const UpdateStatusToDb = async (jsonData) => {
         await fetch(`http://localhost:3000/tasks/updateStatus`, {
@@ -106,7 +108,6 @@ const TaskEnter = () => {
             });
     };
 
-
     const DeleteToDb = async (jsonData) => {
         await fetch(`http://localhost:3000/tasks/deleteTask`, {
             method: "DELETE",
@@ -124,15 +125,12 @@ const TaskEnter = () => {
             });
     };
 
-
     useEffect(() => {
-
         setTimeout(() => {
             DataFetching();
             setLoading(false)
         }, 500);
     }, []);
-
 
     const openPopup = (task, index) => {
 
@@ -172,8 +170,8 @@ const TaskEnter = () => {
     };
 
     const UpdateTask = (e) => {
-        setEditedTask(e.target.value)
-    }
+        setEditedTask(e.target.value);
+    };
 
     const DeleteTask = (index) => {
         const newDatas = userTaskData.filter((e, i) => i !== index);
@@ -310,6 +308,8 @@ const TaskEnter = () => {
 };
 
 export default TaskEnter;
+
+
 
 
 
