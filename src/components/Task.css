@@ -16,6 +16,7 @@
     border-radius: 5px;
 }
 
+
 ul {
     list-style-type: none;
     padding: 0;
@@ -27,6 +28,11 @@ li {
 
 button {
     margin-left: 5px;
+    border: 1px solid #ccc;
+    padding: 5px 10px;
+    border-radius: 5px;
+    display: inline-block;
+    vertical-align: middle; /* Align buttons vertically */
 }
 
 input[type="text"] {
@@ -42,4 +48,29 @@ label {
     max-width: 500px;
     margin: 0 auto;
     padding: 20px;
+}
+
+.TaskTable {
+    border-collapse: collapse;
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.TaskTable th,
+.TaskTable td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+.TaskTable th {
+    background-color: #f2f2f2;
+}
+
+.TaskTable tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.TaskTable td button {
+    margin: 0;
 }

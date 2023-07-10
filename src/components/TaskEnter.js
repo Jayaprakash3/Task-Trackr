@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRef } from 'react';
+import { AiFillFilter } from "react-icons/ai";
 import './Task.css';
-
 const TaskEnter = () => {
     const inputRef = useRef();
     const [userId, setuserId] = useState('');
@@ -13,7 +13,7 @@ const TaskEnter = () => {
     const [editedTask, setEditedTask] = useState('');
     const [editedTaskIndex, setEditedTaskIndex] = useState(null);
     const [userTaskData, setUserTaskData] = useState([]);
-
+    const [isLoading, setLoading] = useState(true);
     const DataFetching = async () => {
 
         const jsonData = {
@@ -49,7 +49,8 @@ const TaskEnter = () => {
             })
             .catch((error) => {
                 console.error("Error saving data:", error);
-            });
+            })
+            
     };
 
     const SaveToDb = async (jsonData) => {
@@ -128,6 +129,7 @@ const TaskEnter = () => {
 
         setTimeout(() => {
             DataFetching();
+            setLoading(false)
         }, 500);
     }, []);
 
@@ -229,11 +231,15 @@ const TaskEnter = () => {
         inputRef.current.focus();
     };
 
+    if (isLoading) {
+        return <div>Loading...</div>;
+      }
+
+
     return (
         <>
-            <div>
+            <div className='mt-10'>                
                 <label htmlFor="task">Task : </label>
-                <br></br>
                 <input
                     type="text"
                     autoFocus
@@ -243,45 +249,68 @@ const TaskEnter = () => {
                     placeholder="Enter the task"
                     onChange={AddTask}
                     ref={inputRef}
+                    className='rounded-xl w-semifull'
                 />
-                <br></br>
-                <button onClick={AddUserTask}>Add</button>
+                <button onClick={AddUserTask} className="bg-orange-500 text-white flow  hover:bg-orange-700 rounded-lg">Add</button>
                 <br></br>
             </div>
 
             <div>
-                <ul>
-                    {userTaskData.length > 0 ? (
-                        userTaskData.map((data, index) => (
-                            <li key={index}>
-                                Task: {data.taskName}----- Status: {data.status}
-                                <button onClick={() => openPopup(data.taskName, index)}>Edit</button>
-                                {isPopupOpen && editedTaskIndex === index && (
-                                    <div className="popup">
-                                        <div className="popup-content">
-                                            <h3>Edit Task</h3>
-                                            <input
-                                                type="text"
-                                                value={editedTask}
-                                                onChange={UpdateTask}
-                                            />
-                                            <button onClick={handleUpdateTask}>Update</button>
-                                            <button onClick={closePopup}>Cancel</button>
-                                        </div>
-                                    </div>
-                                )}
-                                <button onClick={() => UpdateStatus(index)}>Completed</button>
-                                <button onClick={() => DeleteTask(index)}>Delete</button>
-                            </li>
-                        ))
-                    ) : (
-                        <li>No task found</li>
-                    )}
-                </ul>
-
+                <table  className="TaskTable">
+                    <thead>
+                        <tr>
+                            <th className='w-90' >Task</th>
+                            <th  className='w-2'>Status</th>
+                            <th  className='w-2'>Edit</th>
+                            <th  className='w-3'>Complete</th>
+                            <th  className='w-3'>Delete</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {userTaskData.length > 0 ? (
+                            userTaskData.map((data, index) => (
+                                <tr key={index}>
+                                    <td>{data.taskName}</td>
+                                    <td>{data.status}</td>
+                                    <td className='async'>
+                                        <button className="bg-indigo-500 text-white flow  hover:bg-red-700 rounded-lg" onClick={() => openPopup(data.taskName, index)}>Edit</button>
+                                        {isPopupOpen && editedTaskIndex === index && (
+                                            <div className="popup">
+                                                <div className="popup-content">
+                                                    <h3>Edit Task</h3>
+                                                    <input
+                                                        type="text" 
+                                                        value={editedTask}
+                                                        onChange={UpdateTask}
+                                                    />
+                                                    <button onClick={handleUpdateTask}>Update</button>
+                                                    <button onClick={closePopup}>Cancel</button>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </td>
+                                    <td>
+                                        <button className="bg-indigo-500 text-white hover:bg-red-700 rounded-lg" onClick={() => UpdateStatus(index)}>Complete</button>
+                                    </td>
+                                    <td>
+                                        <button className="bg-indigo-500 text-white  hover:bg-red-700 rounded-lg" onClick={() => DeleteTask(index)}>Delete</button>
+                                    </td>
+                                </tr>
+                            ))
+                        ) : (
+                            <tr>
+                                <td colSpan="5">No task found</td>
+                            </tr>
+                        )}
+                    </tbody>
+                </table>
             </div>
         </>
     );
 };
 
 export default TaskEnter;
+
+
+
+
