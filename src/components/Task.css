@@ -71,6 +71,6 @@ label {
     background-color: #f9f9f9;
 }
 
-.TaskTable td button {
+.TaskTable td button {align-self: start;
     margin: 0;
 }
