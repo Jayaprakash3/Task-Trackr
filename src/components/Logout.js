@@ -8,13 +8,13 @@ const Logout = () => {
   const handleLogout = () => {
     localStorage.setItem('authenticated', false);
     setUserInfo(null);
-    navigate('/');
     console.log('User logged out');
+    navigate('/');
   };
 
   return (
     <div>
-      <button onClick={handleLogout} className="bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 px-4 border-b-4 border-blue-700 hover:border-blue-500 rounded">
+      <button onClick={handleLogout} className="bg-purple-500 hover:bg-purple-400 text-white font-bold py-2 px-4 border-b-4 border-purple-700 hover:border-purple-500 rounded">
           LogOut
       </button>
     </div>

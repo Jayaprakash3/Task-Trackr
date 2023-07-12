@@ -15,12 +15,15 @@ const UserLogin = () => {
         const userInfo = {
             email: decodedToken.email,
             name: decodedToken.name,
+            authenticated : true
         };
         setUserInfo(userInfo);
         setauthenticated(true);
         localStorage.setItem("authenticated", true);
+        localStorage.setItem("email", userInfo.email);
+        localStorage.setItem("name", userInfo.name);
         navigate("/task" , {state: {userInfo:userInfo}});
-        // navigate("/profile" , {state: {userInfo:userInfo}});
+        //navigate("/profile" , {state: {userInfo:userInfo}});
     }
     const handleFailure = (error) => {
         console.log(error);

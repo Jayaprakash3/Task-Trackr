@@ -3,6 +3,7 @@ import React, { useEffect, useState , useRef } from 'react';
 import { useNavigate , useLocation } from "react-router-dom";
 import './Task.css';
 import MyNavigation from './UI/Navigation';
+import Search from './Search';
 
 const TaskEnter = () => {
     const navigate = useNavigate();
@@ -18,14 +19,18 @@ const TaskEnter = () => {
     const [editedTaskIndex, setEditedTaskIndex] = useState(null);
     const [userTaskData, setUserTaskData] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [authenticated, setauthenticated] = useState(null);
     const userInfo = location.state ? location.state.userInfo : null;
-     //console.log(userInfo);
-
+    const [query, setQuery] = useState("");
+    const [filteredResults, setFilteredResults] = useState([]);
+    if(localStorage.getItem("authenticated") === "false"){
+        localStorage.setItem("email",'');
+        localStorage.setItem("name",'');
+        navigate("/");
+    }
     const DataFetching = async () => {
         const jsonData = {
-            emailId: userInfo.email,
-            name: userInfo.name
+            emailId: userInfo ? userInfo.email : localStorage.getItem("email"),
+            name: userInfo ? userInfo.name : localStorage.getItem("name")
         }
         // const jsonData = {
         //     emailId: "selvaraj.sivasankari@gmail.com",
@@ -33,7 +38,7 @@ const TaskEnter = () => {
         // }
 
         const dbData = JSON.stringify(jsonData);
-        console.log(jsonData);
+        // console.log(jsonData);
 
         try {
             const response = await fetch(`http://localhost:3000/tasks/createNewUser`, {
@@ -144,7 +149,6 @@ const TaskEnter = () => {
 
 
     const openPopup = (task, index) => {
-
         console.log(task + "1234567")
         setEditedTask(task);
         setEditedTaskIndex(index);
@@ -170,13 +174,9 @@ const TaskEnter = () => {
             }
             const dbData = JSON.stringify(Data)
             UpdateTaskToDb(dbData);
-
         }
         inputRef.current.focus();
-
     };
-
-
 
     const AddTask = (e) => {
         setTask(e.target.value);
@@ -196,7 +196,6 @@ const TaskEnter = () => {
         const dbData = JSON.stringify(Data)
         inputRef.current.focus();
         DeleteToDb(dbData);
-
     };
 
     const UpdateStatus = (index) => {
@@ -215,7 +214,6 @@ const TaskEnter = () => {
         const dbData = JSON.stringify(Data)
         UpdateStatusToDb(dbData);
         inputRef.current.focus();
-
     };
 
     const AddUserTask = () => {
@@ -236,7 +234,6 @@ const TaskEnter = () => {
             SaveToDb(dbData);
             setEmailId('');
             setTask("")
-
             inputRef.current.value = '';
             inputRef.current.focus();
         }
@@ -245,9 +242,12 @@ const TaskEnter = () => {
             inputRef.current.value = '';
             inputRef.current.focus();
         }
-
     };
 
+    const SetSearchValue = (e) => {
+        setQuery(e.target.value);
+    };
+    const filteredData = query ? userTaskData.filter((e) => e.taskName.toLowerCase().includes(query.toLowerCase())) : userTaskData;
 
     return (
         <>
@@ -271,6 +271,15 @@ const TaskEnter = () => {
 
                     <button className="text-red-700 hover:text-white border border-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2 dark:border-red-500 dark:text-red-500 dark:hover:text-white dark:hover:bg-red-600 dark:focus:ring-red-900" onClick={AddUserTask}>Add</button>
 
+                    <form className="max-w-sm px-4">
+                        <div className="relative">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="absolute top-0 bottom-0 w-6 h-6 my-auto text-gray-400 left-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                            </svg>
+                            <input type="text" placeholder="Search" className="w-full py-3 pl-12 pr-4 text-gray-500 border rounded-md outline-none bg-gray-50 focus:bg-white focus:border-indigo-600" value={query} onChange={SetSearchValue} />
+                        </div>
+                    </form>
+    
 
                     <br></br>
                 </div>
@@ -296,13 +305,14 @@ const TaskEnter = () => {
                             } else {
                                 return (
                                     <>
-                                        {userTaskData.length > 0 ? (
-                                            userTaskData.map((data, index) => (
+                                        {filteredData.length > 0 ? (
+
+                                                filteredData.map((data, index) => (
                                                 <tr key={index}>
                                                     <td style={{ textAlign: 'center' }}>{data.taskName}</td>
                                                     <td style={{ textAlign: 'center' }}>{data.status}</td>
                                                     <td style={{ textAlign: 'center' }}>
-                                                        <button type="button" className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" onClick={() => openPopup(data.taskName, index)}>
+                                                        <button type="button" className="text-white bg-white-700 hover:bg-white-800 focus:ring-4 focus:outline-none focus:ring-white-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center mr-2 dark:bg-white-600 dark:hover:bg-white-700 dark:focus:ring-white-800" onClick={() => openPopup(data.taskName, index)}>
                                                             <svg className="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 18">
                                                                 <path d="M12.687 14.408a3.01 3.01 0 0 1-1.533.821l-3.566.713a3 3 0 0 1-3.53-3.53l.713-3.566a3.01 3.01 0 0 1 .821-1.533L10.905 2H2.167A2.169 2.169 0 0 0 0 4.167v11.666A2.169 2.169 0 0 0 2.167 18h11.666A2.169 2.169 0 0 0 16 15.833V11.1l-3.313 3.308Zm5.53-9.065.546-.546a2.518 2.518 0 0 0 0-3.56 2.576 2.576 0 0 0-3.559 0l-.547.547 3.56 3.56Z" />
                                                                 <path d="M13.243 3.2 7.359 9.081a.5.5 0 0 0-.136.256L6.51 12.9a.5.5 0 0 0 .59.59l3.566-.713a.5.5 0 0 0 .255-.136L16.8 6.757 13.243 3.2Z" />
@@ -327,14 +337,14 @@ const TaskEnter = () => {
                                                         )}
                                                     </td>
                                                     <td style={{ textAlign: 'center' }}>
-                                                        <button type="button" className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" onClick={() => UpdateStatus(index)}>
+                                                        <button type="button" className="text-white bg-white-700 hover:bg-white-800 focus:ring-4 focus:outline-none focus:ring-white-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center mr-2 dark:bg-white-600 dark:hover:bg-white-700 dark:focus:ring-white-800" onClick={() => UpdateStatus(index)}>
                                                             <svg className="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 12">
                                                                 <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M1 5.917 5.724 10.5 15 1.5" />
                                                             </svg>
                                                         </button>
                                                     </td>
                                                     <td style={{ textAlign: 'center' }}>
-                                                        <button type="button" className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" onClick={() => DeleteTask(index)}>
+                                                        <button type="button" className="text-white bg-white-700 hover:bg-white-800 focus:ring-4 focus:outline-none focus:ring-white-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center mr-2 dark:bg-white-600 dark:hover:bg-white-700 dark:focus:ring-white-800" onClick={() => DeleteTask(index)}>
                                                             <svg className="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 20">
                                                                 <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M1 5h16M7 8v8m4-8v8M7 1h4a1 1 0 0 1 1 1v3H6V2a1 1 0 0 1 1-1ZM3 5h12v13a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5Z" />
                                                             </svg>
