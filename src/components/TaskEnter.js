@@ -1,12 +1,12 @@
-import React, { useEffect, useState, useRef, Fragment } from 'react';
-import { Label, TextInput, Button } from "flowbite-react";
-import editImage from '../assets/edit.png';
-import tickImage from '../assets/tick.png';
-import trashImage from '../assets/trash.png';
-import classes from './UI/Card.module.css';
-import { AiFillFilter } from "react-icons/ai";
+
+import React, { useEffect, useState , useRef } from 'react';
+import { useNavigate , useLocation } from "react-router-dom";
 import './Task.css';
+import MyNavigation from './UI/Navigation';
+
 const TaskEnter = () => {
+    const navigate = useNavigate();
+    const location = useLocation();
     const inputRef = useRef();
     const [userId, setuserId] = useState('');
     const [date, setDate] = useState(new Date());
@@ -17,45 +17,51 @@ const TaskEnter = () => {
     const [editedTask, setEditedTask] = useState('');
     const [editedTaskIndex, setEditedTaskIndex] = useState(null);
     const [userTaskData, setUserTaskData] = useState([]);
-    const [isLoading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(true);
+    const [authenticated, setauthenticated] = useState(null);
+    const userInfo = location.state ? location.state.userInfo : null;
+     //console.log(userInfo);
+
     const DataFetching = async () => {
-
         const jsonData = {
-            emailId: "selvaraj.sivasankari@gmail.com",
-            name: "sankari"
+            emailId: userInfo.email,
+            name: userInfo.name
         }
+        // const jsonData = {
+        //     emailId: "selvaraj.sivasankari@gmail.com",
+        //     name: "sankari"
+        // }
 
-        const dbData = JSON.stringify(jsonData)
+        const dbData = JSON.stringify(jsonData);
         console.log(jsonData);
 
-        await fetch(`http://localhost:3000/tasks/createNewUser`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: dbData,
-        })
-            .then((response) => response.json())
-            .then((data) => {
-                if (data.tasks !== 'No-Task') {
-                    setUserTaskData(data);
-                    if (data.length > 0) {
-                        setuserId(data[0].userId);
-                    }
-                    console.log("Data saved successfully111111111:", data);
-                    console.log("Dsimnplly:", userTaskData);
-                }
-                else {
-                    setuserId(data.userId);
-                    console.log("hiiii")
-                }
+        try {
+            const response = await fetch(`http://localhost:3000/tasks/createNewUser`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: dbData,
+            });
 
-            })
-            .catch((error) => {
-                console.error("Error saving data:", error);
-            })
-            
+            const data = await response.json();
+
+            if (data.tasks !== 'No-Task') {
+                setUserTaskData(data);
+                if (data.length > 0) {
+                    setuserId(data[0].userId);
+                }
+                console.log("Data saved successfully", data);
+            } else {
+                setuserId(data.userId);
+            }
+        } catch (error) {
+            console.error("Error saving data:", error);
+        } finally {
+            setLoading(false);
+        }
     };
+
 
     const SaveToDb = async (jsonData) => {
         await fetch(`http://localhost:3000/tasks/new`, {
@@ -74,6 +80,7 @@ const TaskEnter = () => {
             });
     };
 
+
     const UpdateTaskToDb = async (jsonData) => {
         await fetch(`http://localhost:3000/tasks/updateTaskName`, {
             method: "PUT",
@@ -90,6 +97,7 @@ const TaskEnter = () => {
                 console.error("Error updating data:", error);
             });
     };
+
 
     const UpdateStatusToDb = async (jsonData) => {
         await fetch(`http://localhost:3000/tasks/updateStatus`, {
@@ -108,6 +116,7 @@ const TaskEnter = () => {
             });
     };
 
+
     const DeleteToDb = async (jsonData) => {
         await fetch(`http://localhost:3000/tasks/deleteTask`, {
             method: "DELETE",
@@ -125,12 +134,14 @@ const TaskEnter = () => {
             });
     };
 
+
     useEffect(() => {
+
         setTimeout(() => {
             DataFetching();
-            setLoading(false)
-        }, 500);
+        }, 1000);
     }, []);
+
 
     const openPopup = (task, index) => {
 
@@ -161,6 +172,8 @@ const TaskEnter = () => {
             UpdateTaskToDb(dbData);
 
         }
+        inputRef.current.focus();
+
     };
 
 
@@ -170,8 +183,8 @@ const TaskEnter = () => {
     };
 
     const UpdateTask = (e) => {
-        setEditedTask(e.target.value);
-    };
+        setEditedTask(e.target.value)
+    }
 
     const DeleteTask = (index) => {
         const newDatas = userTaskData.filter((e, i) => i !== index);
@@ -181,8 +194,7 @@ const TaskEnter = () => {
             "userId": userId
         }
         const dbData = JSON.stringify(Data)
-
-
+        inputRef.current.focus();
         DeleteToDb(dbData);
 
     };
@@ -201,105 +213,144 @@ const TaskEnter = () => {
             "userId": userId
         }
         const dbData = JSON.stringify(Data)
-
         UpdateStatusToDb(dbData);
+        inputRef.current.focus();
+
     };
 
     const AddUserTask = () => {
-        setDate(new Date());
-        console.log(date.toString())
-        const newData = { taskName, status, date, userId };
-        console.log(newData)
-        setUserTaskData([...userTaskData, newData]);
+        if (taskName) {
+            setDate(new Date());
+            console.log(date.toString())
+            const newData = { taskName, status, date, userId };
+            console.log(newData)
+            setUserTaskData([...userTaskData, newData]);
+            const Data = {
+                "taskName": taskName,
+                "userId": userId,
+                "status": status,
+                "date": new Date()
+            }
+            const dbData = JSON.stringify(Data)
+            console.log("saving")
+            SaveToDb(dbData);
+            setEmailId('');
+            setTask("")
 
-
-        const Data = {
-            "taskName": taskName,
-            "userId": userId,
-            "status": status,
-            "date": new Date()
+            inputRef.current.value = '';
+            inputRef.current.focus();
         }
-        const dbData = JSON.stringify(Data)
-        console.log("saving")
-        // console.log(dbData)
+        else {
+            setTask("")
+            inputRef.current.value = '';
+            inputRef.current.focus();
+        }
 
-        SaveToDb(dbData);
-        setEmailId('');
-        inputRef.current.value = '';
-        inputRef.current.focus();
     };
-
-    if (isLoading) {
-        return <div>Loading...</div>;
-      }
 
 
     return (
         <>
-            <div className='mt-10'>                
-                <label htmlFor="task">Task : </label>
-                <input
-                    type="text"
-                    autoFocus
-                    required
-                    name="taskName"
-                    id="taskName"
-                    placeholder="Enter the task"
-                    onChange={AddTask}
-                    ref={inputRef}
-                    className='rounded-xl w-semifull'
-                />
-                <button onClick={AddUserTask} className="bg-orange-500 text-white flow  hover:bg-orange-700 rounded-lg">Add</button>
-                <br></br>
-            </div>
+        <MyNavigation />
+            <div style={{ margin: '100px' }}>
 
-            <div>
-                <table  className="TaskTable">
+                <div style={{ margin: '30px' }}>
+                    <label htmlFor="task">Task : </label>
+                    <br></br>
+                    <input
+                        type="text"
+                        autoFocus
+                        required
+                        name="taskName"
+                        id="taskName"
+                        placeholder="Enter the task"
+                        onChange={AddTask}
+                        ref={inputRef}
+                        style={{ border: '1px solid black', borderRadius: '10px' }}
+                    />
+
+                    <button className="text-red-700 hover:text-white border border-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2 dark:border-red-500 dark:text-red-500 dark:hover:text-white dark:hover:bg-red-600 dark:focus:ring-red-900" onClick={AddUserTask}>Add</button>
+
+
+                    <br></br>
+                </div>
+                <table className="TaskTable">
                     <thead>
                         <tr>
-                            <th className='w-90' >Task</th>
-                            <th  className='w-2'>Status</th>
-                            <th  className='w-2'>Edit</th>
-                            <th  className='w-3'>Complete</th>
-                            <th  className='w-3'>Delete</th>
+                            <th style={{ textAlign: 'center' }}>Task</th>
+                            <th style={{ textAlign: 'center' }}>Status</th>
+                            <th style={{ textAlign: 'center' }}>Edit</th>
+                            <th style={{ textAlign: 'center' }}>Complete</th>
+                            <th style={{ textAlign: 'center' }}>Delete</th>
                         </tr>
                     </thead>
+
                     <tbody>
-                        {userTaskData.length > 0 ? (
-                            userTaskData.map((data, index) => (
-                                <tr key={index}>
-                                    <td>{data.taskName}</td>
-                                    <td>{data.status}</td>
-                                    <td className='async'>
-                                        <button className="bg-indigo-500 text-white flow  hover:bg-red-700 rounded-lg" onClick={() => openPopup(data.taskName, index)}>Edit</button>
-                                        {isPopupOpen && editedTaskIndex === index && (
-                                            <div className="popup">
-                                                <div className="popup-content">
-                                                    <h3>Edit Task</h3>
-                                                    <input
-                                                        type="text" 
-                                                        value={editedTask}
-                                                        onChange={UpdateTask}
-                                                    />
-                                                    <button onClick={handleUpdateTask}>Update</button>
-                                                    <button onClick={closePopup}>Cancel</button>
-                                                </div>
-                                            </div>
+                        {(() => {
+                            if (loading) {
+                                return (
+                                    <tr>
+                                        <td colSpan="5" style={{ textAlign: 'center' }}>Loading</td>
+                                    </tr>
+                                );
+                            } else {
+                                return (
+                                    <>
+                                        {userTaskData.length > 0 ? (
+                                            userTaskData.map((data, index) => (
+                                                <tr key={index}>
+                                                    <td style={{ textAlign: 'center' }}>{data.taskName}</td>
+                                                    <td style={{ textAlign: 'center' }}>{data.status}</td>
+                                                    <td style={{ textAlign: 'center' }}>
+                                                        <button type="button" className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" onClick={() => openPopup(data.taskName, index)}>
+                                                            <svg className="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 18">
+                                                                <path d="M12.687 14.408a3.01 3.01 0 0 1-1.533.821l-3.566.713a3 3 0 0 1-3.53-3.53l.713-3.566a3.01 3.01 0 0 1 .821-1.533L10.905 2H2.167A2.169 2.169 0 0 0 0 4.167v11.666A2.169 2.169 0 0 0 2.167 18h11.666A2.169 2.169 0 0 0 16 15.833V11.1l-3.313 3.308Zm5.53-9.065.546-.546a2.518 2.518 0 0 0 0-3.56 2.576 2.576 0 0 0-3.559 0l-.547.547 3.56 3.56Z" />
+                                                                <path d="M13.243 3.2 7.359 9.081a.5.5 0 0 0-.136.256L6.51 12.9a.5.5 0 0 0 .59.59l3.566-.713a.5.5 0 0 0 .255-.136L16.8 6.757 13.243 3.2Z" />
+                                                            </svg>
+                                                        </button>
+
+                                                        {isPopupOpen && editedTaskIndex === index && (
+                                                            <div className="popup">
+                                                                <div className="popup-content">
+                                                                    <h2 style={{ textAlign: 'left' }}>Edit Task</h2>
+                                                                    <input
+                                                                        type="text"
+                                                                        value={editedTask}
+                                                                        onChange={UpdateTask}
+                                                                        style={{ border: '1px solid black', borderRadius: '20px' }}
+                                                                        autoFocus
+                                                                    />
+                                                                    <button className="text-yellow-400 hover:text-white border border-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:outline-none focus:ring-yellow-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2 dark:border-yellow-300 dark:text-yellow-300 dark:hover:text-white dark:hover:bg-yellow-400 dark:focus:ring-yellow-900" onClick={handleUpdateTask}>Update</button>
+                                                                    <button className="text-yellow-400 hover:text-white border border-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:outline-none focus:ring-yellow-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2 dark:border-yellow-300 dark:text-yellow-300 dark:hover:text-white dark:hover:bg-yellow-400 dark:focus:ring-yellow-900" onClick={closePopup}>Cancel</button>
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                    </td>
+                                                    <td style={{ textAlign: 'center' }}>
+                                                        <button type="button" className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" onClick={() => UpdateStatus(index)}>
+                                                            <svg className="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 12">
+                                                                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M1 5.917 5.724 10.5 15 1.5" />
+                                                            </svg>
+                                                        </button>
+                                                    </td>
+                                                    <td style={{ textAlign: 'center' }}>
+                                                        <button type="button" className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" onClick={() => DeleteTask(index)}>
+                                                            <svg className="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 20">
+                                                                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M1 5h16M7 8v8m4-8v8M7 1h4a1 1 0 0 1 1 1v3H6V2a1 1 0 0 1 1-1ZM3 5h12v13a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5Z" />
+                                                            </svg>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            ))
+                                        ) : (
+                                            <tr>
+                                                <td colSpan="5" style={{ textAlign: 'center' }}>No task found</td>
+                                            </tr>
                                         )}
-                                    </td>
-                                    <td>
-                                        <button className="bg-indigo-500 text-white hover:bg-red-700 rounded-lg" onClick={() => UpdateStatus(index)}>Complete</button>
-                                    </td>
-                                    <td>
-                                        <button className="bg-indigo-500 text-white  hover:bg-red-700 rounded-lg" onClick={() => DeleteTask(index)}>Delete</button>
-                                    </td>
-                                </tr>
-                            ))
-                        ) : (
-                            <tr>
-                                <td colSpan="5">No task found</td>
-                            </tr>
-                        )}
+                                    </>
+                                );
+                            }
+                        })()}
                     </tbody>
                 </table>
             </div>
@@ -308,9 +359,3 @@ const TaskEnter = () => {
 };
 
 export default TaskEnter;
-
-
-
-
-
-
