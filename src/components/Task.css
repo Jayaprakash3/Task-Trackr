@@ -94,4 +94,11 @@ label {
   .pagination .active {
     background-color: cornflowerblue;
   }
+
+  .pagination .previous {
+    margin-top: auto;
+  }
   
+  .pagination .next {
+    margin-top: auto;
+  }

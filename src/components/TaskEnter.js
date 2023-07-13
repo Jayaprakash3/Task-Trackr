@@ -430,12 +430,12 @@ const TaskEnter = () => {
         </table>
         <ReactPaginate
           breakLabel="..."
-          nextLabel=">> Next"
+          nextLabel=">>"
           onPageChange={handlePageClick}
           pageRangeDisplayed={5}
           pageClassName="page-item"
           pageCount={pageCount}
-          previousLabel="<< Prev"
+          previousLabel="<<"
           containerClassName="pagination"
           activeClassName="active"
           renderOnZeroPageCount={null}
