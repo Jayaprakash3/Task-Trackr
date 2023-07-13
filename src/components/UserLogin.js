@@ -8,13 +8,16 @@ const clientId = process.env.REACT_APP_CLIENT_ID;
 
 const UserLogin = () => {
     const navigate = useNavigate();
-    const [authenticated, setauthenticated] = useState(localStorage.getItem(localStorage.getItem("authenticated")|| false));
+    const [authenticated, setauthenticated] = useState(
+        localStorage.getItem("authenticated") || false
+    );
     const [userInfo,setUserInfo] = useState([]);
     const handleLogin = (credentialResponse) => {
         const decodedToken = jwtDecode(credentialResponse.credential);
         const userInfo = {
             email: decodedToken.email,
             name: decodedToken.name,
+            picture : decodedToken.picture,
             authenticated : true
         };
         setUserInfo(userInfo);

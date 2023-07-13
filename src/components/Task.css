@@ -74,3 +74,24 @@ label {
 .TaskTable td button {align-self: start;
     margin: 0;
 }
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+  }
+  
+  .pagination .page-item {
+    list-style-type: none;
+    display: inline-block;
+    margin: 5px;
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    cursor: pointer;
+  }
+  
+  .pagination .active {
+    background-color: cornflowerblue;
+  }
+  
