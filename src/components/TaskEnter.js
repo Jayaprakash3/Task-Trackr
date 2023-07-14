@@ -264,7 +264,7 @@ const TaskEnter = () => {
   const filteredData = query ? userTaskData.filter((e) => e.taskName.toLowerCase().includes(query.toLowerCase())) : userTaskData;
   const itemsPerPage = 5;
   const itemOffset = currentPage * itemsPerPage;
-  const currentItems = filteredData.slice(itemOffset, itemOffset + itemsPerPage);
+  const currentItems = filteredData.length > 0 ? filteredData.slice(itemOffset, itemOffset + itemsPerPage) : filteredData;
   const pageCount = Math.ceil(filteredData.length / itemsPerPage);
 
   const handlePageClick = (event) => {
